@@ -1,0 +1,42 @@
+
+service: data-lake-es-input
+custom:
+  pythonRequirements:
+    usePipenv: true
+    dockerizePip: true
+  wsgi:
+    app: app.app
+    packRequirements: false
+
+provider:
+  name: aws
+  runtime: python3.8
+  stage: ${opt:stage,'dev'}
+  region: us-west-2
+  environment:
+    ENVIRONMENT: ${self:provider.stage}
+    REGION: ${opt:region, self:provider.region}
+    CONFIGFILE: config.${self:provider.stage}.yml
+    FIREHOSE_DELIVERY_STREAM: ${file(config.${self:provider.stage}.yml):FIREHOSE_DELIVERY_STREAM}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - firehose:PutRecord
+        - firehose:PutRecordBatch
+      Resource:
+        - "arn:aws:firehose:${opt:region, self:provider.region}:*:deliverystream/${self:provider.environment.FIREHOSE_DELIVERY_STREAM}"
+
+functions:
+  app:
+    timeout: 30
+    handler: wsgi_handler.handler
+    events:
+      - http: ANY /
+      - http: ANY {proxy+}
+package:
+  exclude:
+    - node_modules/**
+    - .pytest_cache/**
+
+plugins:
+  - serverless-python-requirements
