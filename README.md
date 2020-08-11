@@ -7,8 +7,8 @@ Tools like filebeat and others are great for shipping logs/events into centraliz
 
 ### installation
 - npm install --save-dev serverless
-- npm install --save-dev serverless-apigw-binary ?
-- npm install --save-dev serverless-python-requirements
-- npm install --save-dev serverless-wsgi
+- sls plugin install -n serverless-wsgi
+- sls plugin install -n serverless-python-requirements
+
 
 ###
