@@ -27,6 +27,7 @@ logger.setLevel(logging.INFO)
 
 
 @app.route("/status")
+@app.route("/status/")
 def status_page():
     return "ok!"
 
