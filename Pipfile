@@ -10,6 +10,10 @@ black = "*"
 [packages]
 flask = "*"
 boto3 = "*"
+<<<<<<< HEAD
+=======
+pyyaml = "*"
+>>>>>>> 24a601f... add bulk posts functionality
 
 [requires]
 python_version = "3.8"

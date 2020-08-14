@@ -1,3 +1,8 @@
 ENVIRONMENT: dev
 REGION: us-west-2
+<<<<<<< HEAD
 FIREHOSE_DELIVERY_STREAM: data_lake_s3_stream
+=======
+FIREHOSE_DELIVERY_STREAM: data_lake_s3_stream
+API_KEY: api_key_goes_here
+>>>>>>> 24a601f... add bulk posts functionality

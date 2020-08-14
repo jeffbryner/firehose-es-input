@@ -1,0 +1,4 @@
+ENVIRONMENT: dev
+REGION: us-west-2
+FIREHOSE_DELIVERY_STREAM: data_lake_s3_stream
+API_KEY: api_key_goes_here
