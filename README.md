@@ -2,11 +2,7 @@
 Mimic an ES endpoint to accept json events from things that would usually post to an elastic search _bulk endpoint and send them to AWS firehose
 
 ## Why
-<<<<<<< HEAD
-Tools like filebeat and others are great for shipping logs/events into centralized log systems. They use the open ES protocol for talking to the API. We can expand the range of destinations by doing a transformation from a normal ES _bulk request to firehose to land in a number of destinations.
-=======
 Tools like filebeat and others are great for shipping logs/events into centralized log systems. The open ES protocol is commonly used for talking to the API providing a _bulk endpoint for posting events from log shippers. Taking that and converting the request to firehose can offer an easy way to integrate to AWS and land in a number of destinations.
->>>>>>> 24a601f... add bulk posts functionality
 
 
 ### installation
@@ -15,9 +11,6 @@ Tools like filebeat and others are great for shipping logs/events into centraliz
 - sls plugin install -n serverless-python-requirements
 
 
-<<<<<<< HEAD
-###
-=======
 ### lambda configuration
 The program expects a config.yml file with the following settings:
 
@@ -68,4 +61,3 @@ output.elasticsearch:
 
 If you are deploying/testing locally, localhost will do. If you deploy this lambda you will get the api gateway address and can use that as shown above to configure (note the /dev/ or /prod/ in the url for the gateway depending on how you've deployed it.)
 
->>>>>>> 24a601f... add bulk posts functionality

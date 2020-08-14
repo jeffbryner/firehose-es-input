@@ -1,11 +1,4 @@
 import base64
-<<<<<<< HEAD
-import logging
-import boto3
-from botocore.errorfactory import ClientError
-import io
-import json
-=======
 import logging.config
 import boto3
 from botocore.errorfactory import ClientError
@@ -13,7 +6,6 @@ from datetime import datetime
 import io
 import json
 import yaml
->>>>>>> 24a601f... add bulk posts functionality
 import os
 from flask import (
     Flask,
@@ -29,14 +21,6 @@ from flask import (
     jsonify,
     Response,
 )
-<<<<<<< HEAD
-
-app = Flask(__name__)
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-
-=======
 from utils.config import get_config
 from functools import wraps
 import random
@@ -220,7 +204,6 @@ def template_endpoint(request_path):
     logging.debug(request_path)
     return ""
 
->>>>>>> 24a601f... add bulk posts functionality
 
 @app.route("/status")
 @app.route("/status/")
@@ -228,10 +211,6 @@ def status_page():
     return "ok!"
 
 
-<<<<<<< HEAD
-if __name__ == "__main__":
-    app.run()
-=======
 @app.route("/_bulk", methods=["POST", "PUT"])
 @check_apikey
 def bulk_index():
@@ -282,4 +261,3 @@ def bulk_index():
 
 if __name__ == "__main__":
     app.run(debug=True)
->>>>>>> 24a601f... add bulk posts functionality
