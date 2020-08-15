@@ -18,17 +18,27 @@ The program expects a config.yml file with the following settings:
 ENVIRONMENT: dev
 REGION: us-west-2
 FIREHOSE_DELIVERY_STREAM: data_lake_s3_stream
-API_KEY: api_key_goes_here
+API_KEY: base64_of_id:api_key_goes_here
+USERNAME: username
+PASSWORD: password
 ```
+Leave values blank for none/unsupported.
 
-The API_KEY is optional, but strongly encouraged if you are exposing this on the open internet. The other settings are likely self-explanatory.
+If you don't set either API_KEY or USERNAME/PASSWORD there will be no authentication which is NOT RECOMMENDED as it could allow someone to inject data into your environment.
 
-The configuration logic will look first to config.yml for default, then config.dev|prod.yml if you've set an env variable called ENVIRONMENT to something. Lastly it will read in the OS environment to allow for any overrides using environment variables.
+API keys have an ID and Value base64 encoded as [id:value](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html)
+
+The value expected here is the base64 encoded combination of id:value
+
+Enabling either API_KEY or USERNAME/PASSWORD basic auth is strongly encouraged if you are exposing this on the open internet. If you set both, the app favors the API_KEY and will look for it in client requests, ignoring USERNAME/PASSWORD.
+
+Some libbeats can use api_key, some can't and only support basic auth. This should allow you to configure to match your environment.
+
+The configuration logic will look first to config.yml for default, then config.dev|prod.yml The serverless.yml configuration sets an env variable called ENVIRONMENT to whatever stage you are deploying so the lambda when deployed will read config.${ENVIRONMENT}.yml. Lastly it will read in the OS environment to allow for any overrides using environment variables.
 
 This should allow you to configure for defaults, dev, test, prod and lambda deployments.
 
-You may need an ES license (from eshost:9200/_license) placed in license.json. Some libbeats check/configure using it and some don't.
-
+Depending on your environemnt, you may need an ES license (from eshost:9200/_license) placed in license.json. Some libbeats check/configure using it and some don't.
 
 ### lambda deployment
 Using the serverless framework deploy via a:
@@ -56,6 +66,8 @@ output.elasticsearch:
 
   # Authentication credentials - either API key or username/password.
   api_key: "id:api_key_goes_here"
+  #username: "elastic"
+  #password: "changeme"
 
 ```
 

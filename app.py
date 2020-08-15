@@ -42,7 +42,7 @@ FIREHOSE_BATCH_SIZE = os.environ.get("FIREHOSE_BATCH_SIZE", 400)
 f_hose = boto3.client("firehose")
 
 
-def is_authorized(headers):
+def is_authorized(request):
     """ check headers for Authorization ApiKey <base64>
         if config.API_KEY is set to something
         used by the check_apikey decorator
@@ -51,23 +51,36 @@ def is_authorized(headers):
     authorized = False
     try:
         if "API_KEY" in config and config.API_KEY:
-            if "Authorization" in headers:
+            # we require api key auth
+            if "Authorization" in request.headers:
                 # should be ApiKey aWQ6YXBpX2tleV9nb2VzX2hlcmU=
                 # where the value is id:key base64 encoded
-                apikey_base64 = headers["Authorization"].split(" ")[1]
-                apikey = base64.b64decode(apikey_base64).decode("utf-8").split(":")[1]
-                if apikey == config.API_KEY:
-                    # logger.debug(f"valid api key {apikey}")
-                    authorized = True
+                apikey_base64 = request.headers["Authorization"].split(" ")
+                if apikey_base64[0] == "ApiKey":
+                    if apikey_base64[1] == config.API_KEY:
+                        # logger.debug(f"valid api key {apikey}")
+                        authorized = True
+                    else:
+                        logger.error("invalid api key")
                 else:
-                    logger.error(f"invalid api key: {apikey}")
+                    logger.error(f"we require ApiKey instead of {apikey_base64[0]}")
             else:
                 logger.error(f"no Authorization header found in incoming request")
+        elif "USERNAME" in config and config.USERNAME:
+            # basic auth
+            basic_auth = request.authorization
+            if basic_auth and basic_auth.type == "basic":
+                # check username/password match
+                if (
+                    basic_auth.username == config.USERNAME
+                    and basic_auth.password == config.PASSWORD
+                ):
+                    authorized = True
         else:
             logger.debug(f"no api key found in config, allowing all requests")
             authorized = True
     except Exception as e:
-        logger.error(f"Exception {e} while trying to validate authorization header")
+        logger.error(f"Exception {e} while trying to validate authorization")
     finally:
         return authorized
 
@@ -76,10 +89,20 @@ def check_apikey(view_function):
     @wraps(view_function)
     # the new, post-decoration function
     def decorated_function(*args, **kwargs):
-        if is_authorized(request.headers):
+        if is_authorized(request):
             return view_function(*args, **kwargs)
         else:
-            abort(401)
+            # send a basic auth header/prompt?
+            if "PASSWORD" in config and config.PASSWORD:
+                # configured for basic auth
+                logger.info("sending auth header")
+                realm = ""
+                return Response(
+                    status=401, headers={"WWW-Authenticate": 'Basic realm="%s"' % realm}
+                )
+            else:
+                # nope
+                abort(401)
 
     return decorated_function
 
