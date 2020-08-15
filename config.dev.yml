@@ -1,4 +1,11 @@
 ENVIRONMENT: dev
 REGION: us-west-2
 FIREHOSE_DELIVERY_STREAM: data_lake_s3_stream
-API_KEY: api_key_goes_here
+# blank for none
+# api keys have an ID and Value base64 encoded id:value
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html
+# the value expected here is the base64 encoded combination
+#
+API_KEY: base64_of_id:api_key_goes_here
+USERNAME:
+PASSWORD:
