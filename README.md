@@ -27,7 +27,7 @@ The configuration logic will look first to config.yml for default, then config.d
 
 This should allow you to configure for defaults, dev, test, prod and lambda deployments.
 
-You will need an ES license (from eshost:9200/_license) placed in license.json.
+You may need an ES license (from eshost:9200/_license) placed in license.json. Some libbeats check/configure using it and some don't.
 
 
 ### lambda deployment
@@ -60,4 +60,96 @@ output.elasticsearch:
 ```
 
 If you are deploying/testing locally, localhost will do. If you deploy this lambda you will get the api gateway address and can use that as shown above to configure (note the /dev/ or /prod/ in the url for the gateway depending on how you've deployed it.)
+
+### browserbeat example
+A great example use case is user browser history. To my knowledge the only way to get a complete browser history is with an agent. Network level inspection misses local files, has issues with TLS, proxies, vpns, etc.
+
+https://github.com/MelonSmasher/browserbeat is a [community libbeat package](https://www.elastic.co/guide/en/beats/libbeat/master/community-beats.html) that can send local browser history from almost all browsers.
+
+Configure it like so:
+
+```yaml
+
+output.elasticsearch:
+  # Array of hosts to connect to.
+  hosts: ["n<apigipperish>g.execute-api.us-west-2.amazonaws.com:443/dev/"]
+  #hosts: ["localhost:5000"]
+
+  # Protocol - either `http` (default) or `https`.
+  protocol: "https"
+
+```
+
+and start with
+
+```bash
+browserbeat -c /path/to/browserbeat.yml
+```
+
+and you'll end up with browser history in your firehose endpoint like so
+
+```yaml
+details:
+  '@timestamp': '2020-08-14T17:56:10.133Z'
+  agent:
+    ephemeral_id: 0e17e2c0-c5b9-4d6d-806f-fdf224dcc2c4
+    hostname: Jeffs-MacBook-Pro.local
+    id: f98b0b8e-58be-499d-898f-650d22f07017
+    type: browserbeat
+    version: 0.0.4-alpha3
+  data:
+    '@processed': '2020-08-14T10:56:10.133063-07:00'
+    '@timestamp': '2020-07-25T22:06:43Z'
+    event:
+      data:
+        client:
+          browser: chrome
+          hostname:
+            hostname: Jeffs-MacBook-Pro.local
+            short: Jeffs-MacBook-Pro
+          ip_addresses:
+          - 192.168.0.103
+          platform: darwin
+          user: jeff
+        entry:
+          date: '2020-07-25 22:06:43'
+          title: ''
+          url: file:///Users/jeff/Documents/defendA/defendA-Fencing-black.svg
+          url_data:
+            forcequery: false
+            fragment: ''
+            host: ''
+            opaque: ''
+            path: /Users/jeff/Documents/defendA/defendA-Fencing-black.svg
+            rawfragment: ''
+            rawpath: ''
+            rawquery: ''
+            scheme: file
+            user: 'null'
+      module: browserbeat-chrome
+    host:
+      hostname: Jeffs-MacBook-Pro.local
+      short: Jeffs-MacBook-Pro
+  ecs:
+    version: 1.1.0
+  host:
+    architecture: x86_64
+    hostname: Jeffs-MacBook-Pro.local
+    id: CC972AC4-AB7A-58AB-BB9C-19036DC8B4DF
+    name: Jeffs-MacBook-Pro.local
+    os:
+      build: 19F101
+      family: darwin
+      kernel: 19.5.0
+      name: Mac OS X
+      platform: darwin
+      version: 10.15.5
+  type: browser.history
+
+```
+
+as an example artifact of opening a local .svg file in chrome.
+
+A caveat that the browserbeat libbeat doesn't seem to support api_key auth, so be careful in your configuration (or send a PR!)
+
 
