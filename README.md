@@ -162,6 +162,6 @@ details:
 
 as an example artifact of opening a local .svg file in chrome.
 
-A caveat that the browserbeat libbeat doesn't seem to support api_key auth, so be careful in your configuration (or send a PR!)
+A caveat that the browserbeat libbeat doesn't seem to support api_key auth, so be sure to setup username/password auth.
 
 
