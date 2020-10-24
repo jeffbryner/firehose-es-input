@@ -28,7 +28,13 @@ from time import gmtime, strftime
 
 
 class ISOFormatter(logging.Formatter):
+    """ A logging time formatter to emit ISO formatted timestamps """
+
     def formatTime(self, record, datefmt=None):
+        """
+            By default the logging module appends msecs to the datefmt that is passed
+            We override that to emit an ISO formatted string including 3 digit milliseconds
+        """
         t = strftime("%Y-%m-%dT%H:%M:%S", gmtime(record.created))
         z = strftime("%z", gmtime(record.created))
         s = "%s.%03d%s" % (t, record.msecs, z)
@@ -36,24 +42,22 @@ class ISOFormatter(logging.Formatter):
 
 
 logger = logging.getLogger()
-# with open("logging_config.yml", "r") as fd:
-#     logging_config = yaml.safe_load(fd)
-#     logging.config.dictConfig(logging_config)
+with open("logging_config.yml", "r") as fd:
+    logging_config = yaml.safe_load(fd)
+    logging.config.dictConfig(logging_config)
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "formatters": {
-        "iso": {
-            "()": ISOFormatter,
-            "format": "%(asctime)s - %(module)s - %(levelname)s - %(message)s",
-        }
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "stream": "ext://sys.stdout",},
     },
-    "handlers": {"console1": {"class": "logging.StreamHandler", "formatter": "iso",},},
-    "root": {"handlers": ["console1"],},
+    "root": {"handlers": ["console"],},
 }
-logging.config.dictConfig(LOGGING)
+# logging.config.dictConfig(LOGGING)
+formatter = ISOFormatter(fmt="%(asctime)s - %(module)s - %(levelname)s - %(message)s")
+for h in logger.handlers:
+    h.setFormatter(formatter)
 logger.setLevel(logging.INFO)
-
 
 app = Flask(__name__)
 config = get_config()
