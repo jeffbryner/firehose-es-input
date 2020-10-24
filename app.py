@@ -24,13 +24,36 @@ from flask import (
 from utils.config import get_config
 from functools import wraps
 import random
+from time import gmtime, strftime
+
+
+class ISOFormatter(logging.Formatter):
+    def formatTime(self, record, datefmt=None):
+        t = strftime("%Y-%m-%dT%H:%M:%S", gmtime(record.created))
+        z = strftime("%z", gmtime(record.created))
+        s = "%s.%03d%s" % (t, record.msecs, z)
+        return s
+
 
 logger = logging.getLogger()
-with open("logging_config.yml", "r") as fd:
-    logging_config = yaml.safe_load(fd)
-    logging.config.dictConfig(logging_config)
-
+# with open("logging_config.yml", "r") as fd:
+#     logging_config = yaml.safe_load(fd)
+#     logging.config.dictConfig(logging_config)
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "iso": {
+            "()": ISOFormatter,
+            "format": "%(asctime)s - %(module)s - %(levelname)s - %(message)s",
+        }
+    },
+    "handlers": {"console1": {"class": "logging.StreamHandler", "formatter": "iso",},},
+    "root": {"handlers": ["console1"],},
+}
+logging.config.dictConfig(LOGGING)
 logger.setLevel(logging.INFO)
+
 
 app = Flask(__name__)
 config = get_config()
